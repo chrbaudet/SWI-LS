@@ -24,7 +24,11 @@ To clean-up, type:
 make clean
 
 If you have problems to compile, edit Makefile and change the line:
+
 STDLIB=c++11
+
 by
+
 STDLIB=c++0x
+
 If it does not work, please, contact us.
