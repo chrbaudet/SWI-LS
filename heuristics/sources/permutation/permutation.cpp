@@ -213,6 +213,18 @@ integer Permutation::numberOfBreakpoints() const {
   return breakpoints;
 }
 
+integer Permutation::numberOfBreakpointsUnsignedPermutation() const {
+  integer breakpoints = 0;
+  integer last = n + 1;
+  integer current = 0;
+  for (integer i = n; i >= 0; --i) {
+    current = abs(permutation[i]);
+    if (abs(last - current) != 1) ++breakpoints;
+    last = current;
+  }
+  return breakpoints;
+}
+
 
 std::string Permutation::toString() const {
   std::string toReturn = std::to_string((const long long int)permutation[1]);

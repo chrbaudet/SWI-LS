@@ -351,36 +351,59 @@ Inversion nb_plus_lrstrip(Permutation &pi, const Problem &problem) {
 
 // Heuristic NB+SMP ////////////////////////////////////////////////////////////
 Inversion nb_plus_smp(Permutation &pi, const Problem &problem) {
-
+  
   integer n = pi.size();
   float n_sq = n * n;
-
+  
   float best = 0;
   Inversion bestInversion;
-  Inversion zeroUnitary;
 
-  Inversions inversions = problem.getInversions();
-  float piScore = pi.numberOfBreakpoints() + ((float)pi.sliceMisplacedPairs() / n_sq);
+  Inversions inversions;
+  float piScore;
 
+  /////////////////////////////////////////////////////////////////////////////
+  ////////////////////////  SIGNED SECTION ////////////////////////////////////
+  /////////////////////////////////////////////////////////////////////////////
+
+  if (pi.isSigned()) {
+    inversions = problem.getInversions();
+    piScore = pi.numberOfBreakpoints() + ((float)pi.sliceMisplacedPairs() / n_sq);
+  
+    for (InversionsIt it = inversions.begin(); it != inversions.end(); ++it) {
+      Inversion r = *it;
+      Permutation sigma = Permutation(pi);
+      sigma.applyInversion(r.i, r.j);
+      float sigmaScore = sigma.numberOfBreakpoints() + ((float)sigma.sliceMisplacedPairs() / n_sq);
+      float benefit = (piScore - sigmaScore) / (r.w + 0.01);
+      if (benefit > best) {
+	best = benefit;
+	bestInversion = r;
+      }
+    }
+  
+    if (best > 0) return bestInversion;
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
+  /////////////////REMMAINING or UNSIGNED SECTION /////////////////////////////
+  /////////////////////////////////////////////////////////////////////////////
+ 
+  inversions = problem.getInversions();
+  piScore = pi.numberOfBreakpointsUnsignedPermutation() + ((float)pi.sliceMisplacedPairs() / n_sq);
+  
   for (InversionsIt it = inversions.begin(); it != inversions.end(); ++it) {
     Inversion r = *it;
     Permutation sigma = Permutation(pi);
     sigma.applyInversion(r.i, r.j);
-    float sigmaScore = sigma.numberOfBreakpoints() + ((float)sigma.sliceMisplacedPairs() / n_sq);
+    float sigmaScore = sigma.numberOfBreakpointsUnsignedPermutation() + ((float)sigma.sliceMisplacedPairs() / n_sq);
     float benefit = (piScore - sigmaScore) / (r.w + 0.01);
     if (benefit > best) {
       best = benefit;
       bestInversion = r;
-    } else if (benefit == 0 && r.i == r.j && zeroUnitary.i == 0) {
-      zeroUnitary = r;
     }
   }
 
-  if (best > 0) return bestInversion;
-
-  if (pi.isSigned() && zeroUnitary.i != 0) return zeroUnitary;
-
-  return adjustSlices(pi, problem);
+  return bestInversion;
 }
 
 

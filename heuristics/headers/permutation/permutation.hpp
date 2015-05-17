@@ -130,6 +130,10 @@ public:
   // Returns the number of breakpoints of the permutation
   integer numberOfBreakpoints() const;
 
+  // Returns the number of breakpoints of the permutation 
+  // ignoring sign information
+  integer numberOfBreakpointsUnsignedPermutation() const;
+
   // Returns the number of breakpoints of the permutation
   integer sliceMisplacedPairs() const;
 
